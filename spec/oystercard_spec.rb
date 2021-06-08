@@ -2,7 +2,9 @@ require 'oystercard'
 
 describe Oystercard do
   subject(:oystercard) { described_class.new }
-  let(:station) { double :station }
+  let(:entry_station) { double :entry_station }
+  let(:exit_station) { double :exit_station }
+  let(:journey) { {entry_station: entry_station, exit_station: exit_station} }
 
   it 'shows the card balance' do
     expect(oystercard.balance).to eq(0)
@@ -26,13 +28,16 @@ describe Oystercard do
   # end
 
   context 'when starting journey' do
+    it 'has no previous journeys' do
+      expect(oystercard.journeys).to be_empty
+    end
 
     it 'is not a journey to start' do
       expect(oystercard).not_to be_in_journey
     end
 
     it 'can touch in' do
-      oystercard.touch_in(station)
+      oystercard.touch_in(entry_station)
       expect(oystercard).to be_in_journey
     end
 
@@ -40,12 +45,12 @@ describe Oystercard do
       min_limit = Oystercard::MIN_LIMIT
       error_msg = "You have insufficient funds!"
       oystercard.top_up(min_limit)
-      expect { oystercard.touch_in(station) }.to raise_error(error_msg)
+      expect { oystercard.touch_in(entry_station) }.to raise_error(error_msg)
     end
 
-    it 'can remember the entry station' do
-      oystercard.touch_in(station)
-      expect(oystercard.entry_station).to eq station
+    it 'can stores the entry station' do
+      oystercard.touch_in(entry_station)
+      expect(oystercard.entry_station).to eq entry_station
     end
 
   end
@@ -53,23 +58,31 @@ describe Oystercard do
   context 'when ending a journey' do
 
     it 'can touch out' do
-      oystercard.touch_in(station)
-      oystercard.touch_out
+      oystercard.touch_in(entry_station)
+      oystercard.touch_out(exit_station)
       expect(oystercard).not_to be_in_journey
     end
 
-    it "can charge for the journey" do
+    it 'can charge for the journey' do
       fare = Oystercard::FARE
-      oystercard.touch_in(station)
-      expect { oystercard.touch_out }.to change { oystercard.balance }.by -fare
+      oystercard.touch_in(entry_station)
+      expect { oystercard.touch_out(exit_station) }.to change { oystercard.balance }.by -fare
+    end
+
+    it 'can store an exit station' do
+      oystercard.touch_in(entry_station)
+      oystercard.touch_out(exit_station)
+      expect(oystercard.exit_station).to eq exit_station
+    end
+
+    it 'can store journeys' do
+      oystercard.touch_in(entry_station)
+      oystercard.touch_out(exit_station)
+      expect(oystercard.journeys).to include journey
     end
 
   end
 
 end
 
-# In order to pay for my journey
-# As a customer
-# I need to know where I've travelled from
-# oystercard.touch_in
-# expect oystercard
+
