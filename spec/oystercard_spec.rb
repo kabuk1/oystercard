@@ -14,7 +14,10 @@ describe Oystercard do
   end
 
   it 'raises and error when top-up limit exceeded' do
-    expect{ oystercard.top_up 100 }.to raise_error 'Exceeds top-up limit of £90'
+    max_limit = Oystercard::MAX_LIMIT
+    error_msg ="Exceeds top-up limit of  £#{max_limit}!"
+    oystercard.top_up(max_limit)
+    expect{ oystercard.top_up 100 }.to raise_error(error_msg)
   end
 
   it 'can deduct fare from my card' do
