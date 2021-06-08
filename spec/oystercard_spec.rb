@@ -2,6 +2,7 @@ require 'oystercard'
 
 describe Oystercard do
   subject(:oystercard) { described_class.new }
+  let(:station) { double :station }
 
   it 'shows the card balance' do
     expect(oystercard.balance).to eq(0)
@@ -31,7 +32,7 @@ describe Oystercard do
     end
 
     it 'can touch in' do
-      oystercard.touch_in
+      oystercard.touch_in(station)
       expect(oystercard).to be_in_journey
     end
 
@@ -39,7 +40,12 @@ describe Oystercard do
       min_limit = Oystercard::MIN_LIMIT
       error_msg = "You have insufficient funds!"
       oystercard.top_up(min_limit)
-      expect { oystercard.touch_in }.to raise_error(error_msg)
+      expect { oystercard.touch_in(station) }.to raise_error(error_msg)
+    end
+
+    it 'can remember the entry station' do
+      oystercard.touch_in(station)
+      expect(oystercard.entry_station).to eq station
     end
 
   end
@@ -47,17 +53,23 @@ describe Oystercard do
   context 'when ending a journey' do
 
     it 'can touch out' do
-      oystercard.touch_in
+      oystercard.touch_in(station)
       oystercard.touch_out
       expect(oystercard).not_to be_in_journey
     end
 
     it "can charge for the journey" do
       fare = Oystercard::FARE
-      oystercard.touch_in
+      oystercard.touch_in(station)
       expect { oystercard.touch_out }.to change { oystercard.balance }.by -fare
     end
 
   end
 
 end
+
+# In order to pay for my journey
+# As a customer
+# I need to know where I've travelled from
+# oystercard.touch_in
+# expect oystercard
