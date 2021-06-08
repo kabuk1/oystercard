@@ -21,4 +21,19 @@ describe Oystercard do
     expect{ oystercard.deduct 25 }.to change{ oystercard.balance}.by -25
   end
 
+  it 'is not a journey to start' do
+    expect(oystercard).not_to be_in_journey
+  end
+
+  it 'can touch in' do
+    oystercard.touch_in
+    expect(oystercard).to be_in_journey
+  end
+
+  it 'can touch out' do
+    oystercard.touch_in
+    oystercard.touch_out
+    expect(oystercard).not_to be_in_journey
+  end
+
 end
