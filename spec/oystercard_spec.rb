@@ -20,23 +20,44 @@ describe Oystercard do
     expect{ oystercard.top_up 100 }.to raise_error(error_msg)
   end
 
-  it 'can deduct fare from my card' do
-    expect{ oystercard.deduct 25 }.to change{ oystercard.balance}.by -25
+  # it 'can deduct fare from my card' do
+  #   expect{ oystercard.deduct 25 }.to change{ oystercard.balance}.by -25
+  # end
+
+  context 'when starting journey' do
+
+    it 'is not a journey to start' do
+      expect(oystercard).not_to be_in_journey
+    end
+
+    it 'can touch in' do
+      oystercard.touch_in
+      expect(oystercard).to be_in_journey
+    end
+
+    it "can check minimum balance on touch in" do
+      min_limit = Oystercard::MIN_LIMIT
+      error_msg = "You have insufficient funds!"
+      oystercard.top_up(min_limit)
+      expect { oystercard.touch_in }.to raise_error(error_msg)
+    end
+
   end
 
-  it 'is not a journey to start' do
-    expect(oystercard).not_to be_in_journey
-  end
+  context 'when ending a journey' do
 
-  it 'can touch in' do
-    oystercard.touch_in
-    expect(oystercard).to be_in_journey
-  end
+    it 'can touch out' do
+      oystercard.touch_in
+      oystercard.touch_out
+      expect(oystercard).not_to be_in_journey
+    end
 
-  it 'can touch out' do
-    oystercard.touch_in
-    oystercard.touch_out
-    expect(oystercard).not_to be_in_journey
+    it "can charge for the journey" do
+      fare = Oystercard::FARE
+      oystercard.touch_in
+      expect { oystercard.touch_out }.to change { oystercard.balance }.by -fare
+    end
+
   end
 
 end
