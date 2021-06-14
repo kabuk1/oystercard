@@ -1,14 +1,20 @@
 require 'station'
 
 describe Station do
-  subject(:station) { described_class.new(name: "Waterloo", zone: 1) }
+  let(:name) { double(:name) }
+  let(:zone) { double(:zone) }
+  subject(:station) { described_class.new(name, zone) }
 
-  it "initializes with a name" do
-    expect(station.name).to eq("Waterloo")
+  it { is_expected.to respond_to(:name) }
+  it { is_expected.to respond_to(:zone) }
+
+  describe '#initialize' do
+    it "initializes with a name" do
+      expect(station.name).to eq name
+    end
+
+    it "initializes with a zone" do
+      expect(station.zone).to eq zone
+    end
   end
-
-  it "initializes with a zone" do
-    expect(station.zone).to eq(1)
-  end
-
 end
